@@ -4,6 +4,20 @@ web app for real estate agent training and content delivery
 
 _126 components, 361 modules_
 
+```
+[ LANGUAGES BREAKDOWN ]
+
+TypeScript   --> 46,424 lines
+JavaScript   --> 252 lines
+CSS          --> 1,202 lines
+JSON         --> 1,147 lines
+Prisma       --> 930 lines
+SQL          --> 500 lines
+Other        --> 48 lines
+
+[ TOTAL LINES OF CODE: 50,503 ]
+```
+
 ### setup
 
 1. install dependencies:
