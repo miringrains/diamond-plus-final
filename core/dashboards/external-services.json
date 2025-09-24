@@ -1,0 +1,136 @@
+{
+  "dashboard": {
+    "title": "Diamond District - External Services (S3/GoHighLevel)",
+    "uid": "dd-external-services",
+    "tags": ["diamond-district", "external", "s3", "gohighlevel"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "panels": [
+      {
+        "title": "S3 Request Rate",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_client_duration_count{service_name=\"diamond-district\",http_host=~\".*s3.*amazonaws.com\"}[5m])) by (http_method)",
+            "legendFormat": "S3 {{http_method}}"
+          }
+        ]
+      },
+      {
+        "title": "GoHighLevel API Calls",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_client_duration_count{service_name=\"diamond-district\",http_host=~\".*gohighlevel.*\"}[5m])) by (http_route)",
+            "legendFormat": "GHL {{http_route}}"
+          }
+        ]
+      },
+      {
+        "title": "S3 Error Rate",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_client_duration_count{service_name=\"diamond-district\",http_host=~\".*s3.*amazonaws.com\",http_status_code=~\"4..|5..\"}[5m])) by (http_status_code)",
+            "legendFormat": "S3 Error {{http_status_code}}"
+          }
+        ],
+        "alert": {
+          "name": "High S3 Error Rate",
+          "conditions": [
+            {
+              "evaluator": { "type": "gt", "params": [0.01] },
+              "operator": { "type": "and" },
+              "query": { "model": "A", "params": ["A", "5m", "now"] },
+              "reducer": { "type": "avg" },
+              "type": "query"
+            }
+          ],
+          "message": "S3 error rate exceeds 1%"
+        }
+      },
+      {
+        "title": "GoHighLevel Success Rate",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "(sum(rate(http_client_duration_count{service_name=\"diamond-district\",http_host=~\".*gohighlevel.*\",http_status_code=~\"2..\"}[5m])) / sum(rate(http_client_duration_count{service_name=\"diamond-district\",http_host=~\".*gohighlevel.*\"}[5m]))) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "format": "percent",
+        "thresholds": "90,95",
+        "colors": ["#d44a3a", "#f9934e", "#299c46"]
+      },
+      {
+        "title": "S3 Operation Latency P95",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_client_duration_bucket{service_name=\"diamond-district\",http_host=~\".*s3.*amazonaws.com\"}[5m])) by (http_method, le))",
+            "legendFormat": "S3 {{http_method}} P95"
+          }
+        ],
+        "yaxes": [{ "format": "ms", "label": "Latency" }]
+      },
+      {
+        "title": "External Service Health",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+        "type": "table",
+        "targets": [
+          {
+            "expr": "avg by (http_host) (rate(http_client_duration_sum{service_name=\"diamond-district\"}[5m]) / rate(http_client_duration_count{service_name=\"diamond-district\"}[5m]))",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "styles": [
+          {
+            "pattern": "Value",
+            "type": "number",
+            "unit": "ms",
+            "decimals": 0,
+            "colorMode": "cell",
+            "thresholds": [100, 500],
+            "colors": ["#299c46", "#f9934e", "#d44a3a"]
+          }
+        ]
+      },
+      {
+        "title": "S3 Signed URL Generation",
+        "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(s3_signed_url_generated_total{service_name=\"diamond-district\"}[5m]))",
+            "legendFormat": "Signed URLs/sec"
+          }
+        ]
+      },
+      {
+        "title": "External API Timeouts",
+        "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(http_client_timeout_total{service_name=\"diamond-district\"}[1h]))",
+            "legendFormat": "Timeouts (1h)"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 5 },
+            { "color": "red", "value": 20 }
+          ]
+        }
+      }
+    ]
+  }
+}

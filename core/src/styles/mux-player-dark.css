@@ -1,0 +1,80 @@
+/* Dark theme for Mux Player */
+
+/* Main player container */
+mux-player {
+  --media-control-background: rgba(0, 0, 0, 0.9) !important;
+  --media-control-hover-background: rgba(255, 255, 255, 0.1) !important;
+  --media-preview-background: rgba(0, 0, 0, 0.9) !important;
+  --media-control-color: #ffffff !important;
+  --media-range-track-background: rgba(255, 255, 255, 0.3) !important;
+  --media-range-thumb-background: #176FFF !important;
+  --media-range-bar-color: #176FFF !important;
+  --media-time-range-buffered-color: rgba(255, 255, 255, 0.5) !important;
+  --media-primary-color: #176FFF !important;
+  --media-secondary-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Control bar background */
+mux-player::part(bottom-controls) {
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.9)) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Time display */
+mux-player::part(time-display) {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* Volume slider */
+mux-player::part(volume-slider) {
+  --media-range-track-background: rgba(255, 255, 255, 0.3) !important;
+  --media-range-thumb-background: #176FFF !important;
+}
+
+/* Progress bar */
+mux-player::part(progress-bar) {
+  --media-range-track-background: rgba(255, 255, 255, 0.2) !important;
+  --media-range-bar-color: #176FFF !important;
+  height: 6px !important;
+}
+
+/* All buttons */
+mux-player button {
+  color: #ffffff !important;
+  background: transparent !important;
+  transition: all 0.2s !important;
+}
+
+mux-player button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Play button specific */
+mux-player::part(play-button) {
+  color: #ffffff !important;
+}
+
+/* Settings menu */
+mux-player::part(settings-menu) {
+  background: rgba(0, 0, 0, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Loading spinner */
+mux-player::part(loading-indicator) {
+  --media-loading-indicator-color: #176FFF !important;
+}
+
+/* Captions */
+mux-player::part(captions) {
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
+}
+
+/* Make sure all text is white */
+mux-player * {
+  color: #ffffff !important;
+}

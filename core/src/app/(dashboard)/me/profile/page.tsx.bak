@@ -1,0 +1,562 @@
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { toast } from "sonner"
+import { Loader2, Upload, X } from "lucide-react"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { useSupabaseAuth } from "@/components/providers"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+export default function ProfilePage() {
+  const authContext = useSupabaseAuth()
+  const [isLoading, setIsLoading] = useState(false)
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [profile, setProfile] = useState<any>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    bio: ""
+  })
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const supabase = getSupabaseBrowserClient()
+  
+  // Log the auth context state
+  console.log('Profile Page - Auth Context:', { 
+    user: authContext?.user, 
+    isLoading: authContext?.isLoading 
+  })
+
+  useEffect(() => {
+    // Load profile data when user is available
+    const loadProfile = async () => {
+      if (!authContext?.user?.id) return
+      
+      try {
+        // Load profile data
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authContext.user.id)
+          .single()
+        
+        if (error) {
+          console.error('Error loading profile:', error)
+          toast.error("Failed to load profile data")
+          return
+        }
+        
+        if (profileData) {
+          setProfile(profileData)
+          setAvatarUrl(profileData.avatar_url)
+        }
+        
+        setFormData({
+          name: authContext.user.user_metadata?.full_name || profileData?.full_name || "",
+          email: authContext.user.email || "",
+          phone: authContext.user.user_metadata?.phone || (profileData?.metadata as any)?.phone || "",
+          location: authContext.user.user_metadata?.location || (profileData?.metadata as any)?.location || "",
+          bio: authContext.user.user_metadata?.bio || (profileData?.metadata as any)?.bio || ""
+        })
+      } catch (error) {
+        console.error('Error in loadProfile:', error)
+        toast.error("Failed to load profile data")
+      }
+    }
+    
+    loadProfile()
+  }, [authContext?.user, supabase])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      const response = await fetch('/api/profile/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          location: formData.location,
+          bio: formData.bio
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update profile')
+      }
+
+      toast.success("Profile updated", {
+        description: "Your profile information has been successfully updated.",
+      })
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message || "Failed to update profile",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    const currentPassword = formData.get('currentPassword') as string
+    const newPassword = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Error", {
+        description: "New passwords do not match",
+      })
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const response = await fetch('/api/profile/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to change password')
+      }
+
+      toast.success("Password changed", {
+        description: "Your password has been successfully updated.",
+      })
+      setIsPasswordDialogOpen(false)
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message || "Failed to change password",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleEmailChange = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+
+    try {
+      const response = await fetch('/api/profile/change-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to change email')
+      }
+
+      toast.success("Email change initiated", {
+        description: data.message || "Please check your inbox to confirm the email change.",
+      })
+      setIsEmailDialogOpen(false)
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message || "Failed to change email",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingAvatar(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+
+      const response = await fetch('/api/profile/avatar', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload avatar')
+      }
+
+      setAvatarUrl(data.avatar_url)
+      toast.success("Avatar updated", {
+        description: "Your profile picture has been updated successfully.",
+      })
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message || "Failed to upload avatar",
+      })
+    } finally {
+      setIsUploadingAvatar(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleAvatarDelete = async () => {
+    setIsUploadingAvatar(true)
+
+    try {
+      const response = await fetch('/api/profile/avatar', {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete avatar')
+      }
+
+      setAvatarUrl(null)
+      toast.success("Avatar removed", {
+        description: "Your profile picture has been removed.",
+      })
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message || "Failed to delete avatar",
+      })
+    } finally {
+      setIsUploadingAvatar(false)
+    }
+  }
+
+  // Allow the component to render even if auth is still loading
+  // The server-side auth check in the layout ensures we're authenticated
+  if (!authContext || authContext.isLoading) {
+    console.log('Auth context is loading or not available')
+    // Instead of showing loading forever, show the page with empty data
+    // and let it populate when auth loads
+  }
+  
+  if (!authContext?.user && authContext?.isLoading === false) {
+    // Only redirect if we're definitely not loading and there's no user
+    console.log('No user found after loading')
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Unable to load user data</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            variant="outline"
+          >
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">My Account</h1>
+        <p className="text-muted-foreground">Manage your account settings and preferences</p>
+      </div>
+
+      <div className="grid gap-6">
+        {/* Profile Information */}
+        <Card className="card-secondary">
+          <CardHeader>
+            <CardTitle>Profile Information</CardTitle>
+            <CardDescription>Update your personal details</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={avatarUrl || undefined} />
+                    <AvatarFallback className="bg-[var(--brand)] text-white text-xl">
+                      {formData.name?.split(' ').map(n => n[0]).join('') || formData.email?.[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {avatarUrl && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={handleAvatarDelete}
+                      disabled={isUploadingAvatar}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                    disabled={isUploadingAvatar}
+                  />
+                  <Button 
+                    variant="outline" 
+                    className="btn-secondary" 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                  >
+                    {isUploadingAvatar ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Change Photo
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    JPEG, PNG, WebP or GIF. Max 5MB.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input 
+                    id="name" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="input-field"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={formData.email}
+                    className="input-field"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    placeholder="+1 (555) 000-0000"
+                    className="input-field"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Input 
+                    id="location" 
+                    value={formData.location}
+                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    placeholder="City, State"
+                    className="input-field"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <textarea
+                  id="bio"
+                  rows={4}
+                  value={formData.bio}
+                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+                  placeholder="Tell us about yourself and your real estate journey..."
+                />
+              </div>
+
+              <Button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Change Email */}
+        <Card className="card-secondary">
+          <CardHeader>
+            <CardTitle>Change Email Address</CardTitle>
+            <CardDescription>Update the email address associated with your account.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="btn-secondary">Change Email</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Change Email</DialogTitle>
+                  <DialogDescription>
+                    Enter your new email address. A confirmation link will be sent to the new address.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleEmailChange} className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">New Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      className="input-field"
+                      placeholder="new@example.com"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" className="btn-primary" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        'Send Confirmation'
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
+
+        {/* Change Password */}
+        <Card className="card-secondary">
+          <CardHeader>
+            <CardTitle>Change Password</CardTitle>
+            <CardDescription>Update your account password.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="btn-secondary">Change Password</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Change Password</DialogTitle>
+                  <DialogDescription>
+                    Enter your current password and new password.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleChangePassword} className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input
+                      id="currentPassword"
+                      name="currentPassword"
+                      type="password"
+                      required
+                      className="input-field"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      name="newPassword"
+                      type="password"
+                      required
+                      className="input-field"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      className="input-field"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" className="btn-primary" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        'Update Password'
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

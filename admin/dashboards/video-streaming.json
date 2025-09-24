@@ -1,0 +1,135 @@
+{
+  "dashboard": {
+    "title": "Diamond District - Video Streaming & Upload",
+    "uid": "dd-video-streaming",
+    "tags": ["diamond-district", "video", "streaming"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "panels": [
+      {
+        "title": "Video Request Rate",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_server_duration_count{service_name=\"diamond-district\",http_route=\"/api/videos/{filename}\"}[5m])) by (http_status_code)",
+            "legendFormat": "Status {{http_status_code}}"
+          }
+        ]
+      },
+      {
+        "title": "Range Requests per Second",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(span_events_total{service_name=\"diamond-district\",event_name=\"video.range_request\"}[5m]))",
+            "legendFormat": "Range Requests/sec"
+          }
+        ]
+      },
+      {
+        "title": "Video Load Time Distribution",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum(increase(video_load_time_ms_bucket{service_name=\"diamond-district\"}[5m])) by (le)",
+            "format": "heatmap"
+          }
+        ]
+      },
+      {
+        "title": "Video Resume Performance",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(video_resume_time_ms_bucket{service_name=\"diamond-district\"}[5m])) by (le))",
+            "legendFormat": "P95 Resume Time"
+          },
+          {
+            "expr": "sum(rate(video_resume_failures_total{service_name=\"diamond-district\"}[5m]))",
+            "legendFormat": "Resume Failures/sec",
+            "yaxis": 2
+          }
+        ],
+        "yaxes": [
+          { "format": "ms", "label": "Resume Time" },
+          { "format": "short", "label": "Failures/sec" }
+        ]
+      },
+      {
+        "title": "S3 Operation Latency",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg by (operation) (rate(s3_operation_duration_sum{service_name=\"diamond-district\"}[5m]) / rate(s3_operation_duration_count{service_name=\"diamond-district\"}[5m]))",
+            "legendFormat": "{{operation}}"
+          }
+        ],
+        "yaxes": [{ "format": "ms", "label": "Latency" }]
+      },
+      {
+        "title": "Upload Metrics",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(upload_bytes_total{service_name=\"diamond-district\"}[5m]))",
+            "legendFormat": "Upload Rate (bytes/sec)"
+          },
+          {
+            "expr": "sum(rate(upload_errors_total{service_name=\"diamond-district\"}[5m]))",
+            "legendFormat": "Upload Errors/sec",
+            "yaxis": 2
+          }
+        ],
+        "yaxes": [
+          { "format": "bytes", "label": "Upload Rate" },
+          { "format": "short", "label": "Errors/sec" }
+        ]
+      },
+      {
+        "title": "Buffering Events",
+        "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(video_buffering_events_total{service_name=\"diamond-district\"}[1h]))",
+            "legendFormat": "Buffering Events (1h)"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 100 },
+            { "color": "red", "value": 500 }
+          ]
+        }
+      },
+      {
+        "title": "Progress Save Performance",
+        "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(progress_save_time_ms_bucket{service_name=\"diamond-district\"}[5m])) by (le))",
+            "legendFormat": "P95 Save Time"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 100 },
+            { "color": "red", "value": 500 }
+          ]
+        },
+        "unit": "ms"
+      }
+    ]
+  }
+}

@@ -1,0 +1,105 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/design/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  darkMode: ["class"],
+  theme: {
+    extend: {
+      colors: {
+        // Design system colors - flattened for easier usage
+        "dd-canvas": "var(--dd-color-bg-canvas)",
+        "dd-chrome": "var(--dd-color-bg-chrome)",
+        "dd-surface": "var(--dd-color-bg-surface)",
+        "dd-surface-raised": "var(--dd-color-bg-surface-raised)",
+        
+        "dd-fg-base": "var(--dd-color-fg-base)",
+        "dd-fg-muted": "var(--dd-color-fg-muted)",
+        "dd-fg-subtle": "var(--dd-color-fg-subtle)",
+        "dd-fg-on-chrome": "var(--dd-color-fg-on-chrome)",
+        "dd-fg-on-brand": "var(--dd-color-fg-on-brand)",
+        
+        "dd-border-base": "var(--dd-color-border-base)",
+        "dd-border-muted": "var(--dd-color-border-muted)",
+        "dd-border-chrome": "var(--dd-color-border-chrome)",
+        
+        "dd-brand": "var(--dd-color-brand-base)",
+        "dd-brand-hover": "var(--dd-color-brand-hover)",
+        "dd-brand-active": "var(--dd-color-brand-active)",
+        "dd-brand-muted": "var(--dd-color-brand-muted)",
+        "dd-brand-surface": "var(--dd-color-brand-surface)",
+        
+        "dd-success": "var(--dd-color-success-base)",
+        "dd-success-muted": "var(--dd-color-success-muted)",
+        
+        "dd-warning": "var(--dd-color-warning-base)",
+        "dd-warning-muted": "var(--dd-color-warning-muted)",
+        
+        "dd-error": "var(--dd-color-error-base)",
+        "dd-error-muted": "var(--dd-color-error-muted)",
+      },
+      spacing: {
+        "dd-0": "var(--dd-space-0)",
+        "dd-1": "var(--dd-space-1)",
+        "dd-2": "var(--dd-space-2)",
+        "dd-3": "var(--dd-space-3)",
+        "dd-4": "var(--dd-space-4)",
+        "dd-6": "var(--dd-space-6)",
+        "dd-8": "var(--dd-space-8)",
+        "dd-12": "var(--dd-space-12)",
+        "dd-16": "var(--dd-space-16)",
+        "dd-24": "var(--dd-space-24)",
+      },
+      borderRadius: {
+        "dd-none": "0",
+        "dd-sm": "var(--dd-radius-sm)",
+        "dd-base": "var(--dd-radius-base)",
+        "dd-md": "var(--dd-radius-md)",
+        "dd-lg": "var(--dd-radius-lg)",
+        "dd-full": "var(--dd-radius-full)",
+      },
+      boxShadow: {
+        "dd-none": "var(--dd-shadow-none)",
+        "dd-subtle": "var(--dd-shadow-subtle)",
+      },
+      fontFamily: {
+        "dd-sans": ["var(--dd-font-family-sans)"],
+        "dd-mono": ["var(--dd-font-family-mono)"],
+      },
+      fontSize: {
+        "dd-xs": "var(--dd-font-size-xs)",
+        "dd-sm": "var(--dd-font-size-sm)",
+        "dd-base": "var(--dd-font-size-base)",
+        "dd-lg": "var(--dd-font-size-lg)",
+        "dd-xl": "var(--dd-font-size-xl)",
+        "dd-2xl": "var(--dd-font-size-2xl)",
+        "dd-3xl": "var(--dd-font-size-3xl)",
+        "dd-4xl": "var(--dd-font-size-4xl)",
+      },
+      fontWeight: {
+        "dd-normal": "var(--dd-font-weight-normal)",
+        "dd-medium": "var(--dd-font-weight-medium)",
+        "dd-semibold": "var(--dd-font-weight-semibold)",
+        "dd-bold": "var(--dd-font-weight-bold)",
+      },
+      transitionDuration: {
+        "dd-instant": "var(--dd-duration-instant)",
+        "dd-fast": "var(--dd-duration-fast)",
+        "dd-base": "var(--dd-duration-base)",
+        "dd-moderate": "var(--dd-duration-moderate)",
+        "dd-slow": "var(--dd-duration-slow)",
+      },
+      transitionTimingFunction: {
+        "dd-out": "var(--dd-ease-out)",
+        "dd-in-out": "var(--dd-ease-in-out)",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+};
+
+export default config;

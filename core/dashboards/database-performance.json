@@ -1,0 +1,95 @@
+{
+  "dashboard": {
+    "title": "Diamond District - Database (Prisma) Performance",
+    "uid": "dd-database-perf",
+    "tags": ["diamond-district", "database", "prisma"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "panels": [
+      {
+        "title": "Database Query Rate",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(prisma_query_duration_count{service_name=\"diamond-district\"}[5m])) by (model, operation)",
+            "legendFormat": "{{model}}.{{operation}}"
+          }
+        ]
+      },
+      {
+        "title": "Query Duration by Model",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg by (model) (rate(prisma_query_duration_sum{service_name=\"diamond-district\"}[5m]) / rate(prisma_query_duration_count{service_name=\"diamond-district\"}[5m]))",
+            "legendFormat": "{{model}}"
+          }
+        ],
+        "yaxes": [{ "format": "ms", "label": "Query Time" }]
+      },
+      {
+        "title": "Slow Queries (>100ms)",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(prisma_query_duration_bucket{service_name=\"diamond-district\",le=\"+Inf\"}[5m])) - sum(rate(prisma_query_duration_bucket{service_name=\"diamond-district\",le=\"100\"}[5m])) by (model, operation)",
+            "legendFormat": "{{model}}.{{operation}}"
+          }
+        ]
+      },
+      {
+        "title": "Database Connection Pool",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "prisma_connection_pool_active{service_name=\"diamond-district\"}",
+            "legendFormat": "Active Connections"
+          },
+          {
+            "expr": "prisma_connection_pool_idle{service_name=\"diamond-district\"}",
+            "legendFormat": "Idle Connections"
+          },
+          {
+            "expr": "prisma_connection_pool_wait{service_name=\"diamond-district\"}",
+            "legendFormat": "Waiting"
+          }
+        ]
+      },
+      {
+        "title": "Most Frequent Queries",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, sum by (model, operation) (increase(prisma_query_duration_count{service_name=\"diamond-district\"}[1h])))",
+            "format": "table",
+            "instant": true
+          }
+        ]
+      },
+      {
+        "title": "Query Error Rate",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(prisma_query_errors_total{service_name=\"diamond-district\"}[5m]))",
+            "legendFormat": "Errors/sec"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.1 },
+            { "color": "red", "value": 1 }
+          ]
+        }
+      }
+    ]
+  }
+}

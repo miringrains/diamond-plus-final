@@ -1,0 +1,343 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../styles/mux-player.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* Shadcn Default Tokens - Light Theme by default */
+  --radius: 0.5rem;
+
+  /* Standard shadcn tokens */
+  --background: hsl(0 0% 100%); /* #FFFFFF */
+  --foreground: hsl(222 15% 12%); /* #0F1114 */
+  
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222 15% 12%);
+  
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222 15% 12%);
+  
+  --primary: hsl(194 82% 51%);
+  --primary-foreground: hsl(0 0% 100%);
+  
+  --secondary: hsl(210 5% 96%);
+  --secondary-foreground: hsl(222 15% 12%);
+  
+  --muted: hsl(210 5% 96%);
+  --muted-foreground: hsl(220 9% 46%);
+  
+  --accent: #15AEE9;
+  --accent-foreground: #0F1114;
+  
+  --destructive: #EB5757;
+  --destructive-foreground: #F5F7FA;
+  
+  --border: #2C2F38;
+  --input: #3A3D45;
+  --ring: #15AEE9;
+  
+  /* Chart Colors */
+  --chart-1: #15AEE9;
+  --chart-2: #1E7FAD;
+  --chart-3: #2FBF71;
+  --chart-4: #F4AE3B;
+  --chart-5: #EB5757;
+
+  /* Sidebar */
+  --sidebar: #1a1e25;
+  --sidebar-foreground: rgba(252, 252, 253, 0.9);
+  --sidebar-primary: #2483ff;
+  --sidebar-primary-foreground: #fcfcfd;
+  --sidebar-accent: rgba(255, 255, 255, 0.1);
+  --sidebar-accent-foreground: #fcfcfd;
+  --sidebar-border: rgba(252, 252, 253, 0.1);
+  --sidebar-ring: #2483ff;
+}
+
+/* Light mode */
+.light {
+  /* Standard shadcn tokens */
+  --background: #FFFFFF;
+  --foreground: #0F1114;
+  
+  --card: #FFFFFF;
+  --card-foreground: #0F1114;
+  
+  --popover: #FFFFFF;
+  --popover-foreground: #0F1114;
+  
+  --primary: #0D9DD6;
+  --primary-foreground: #FFFFFF;
+  
+  --secondary: #F0F2F5;
+  --secondary-foreground: #0F1114;
+  
+  --muted: #F5F7FA;
+  --muted-foreground: #6C7683;
+  
+  --accent: #0D9DD6;
+  --accent-foreground: #FFFFFF;
+  
+  --destructive: #DC4444;
+  --destructive-foreground: #FFFFFF;
+  
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #0D9DD6;
+  
+  /* Charts */
+  --chart-1: #0D9DD6;
+  --chart-2: #15AEE9;
+  --chart-3: #2FBF71;
+  --chart-4: #E09E2B;
+  --chart-5: #DC4444;
+
+  /* Sidebar */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0F1114;
+  --sidebar-primary: #0D9DD6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F5F7FA;
+  --sidebar-accent-foreground: #0F1114;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #0D9DD6;
+}
+
+/* Standard utilities */
+@layer utilities {
+  /* Focus states */
+  .focus\:border-ring:focus { border-color: var(--ring); }
+  .focus\:ring-ring:focus { --tw-ring-color: var(--ring); }
+
+  /* Animation utilities for theater mode */
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes zoom-in {
+    from { transform: scale(0.95); }
+    to { transform: scale(1); }
+  }
+
+  .animate-in {
+    animation: animate-in 0.2s ease-out;
+  }
+
+  .fade-in-0 {
+    animation: fade-in 0.2s ease-out;
+  }
+
+  .zoom-in-95 {
+    animation: zoom-in 0.2s ease-out;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    height: 100%;
+  }
+
+
+
+
+
+
+
+
+
+  
+  /* Enhance focus states with the accent color */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  /* Smooth transitions for interactive elements */
+  button, a, input, textarea, select {
+    @apply transition-colors duration-200;
+  }
+
+
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-base);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 6px;
+    border: 3px solid var(--bg-base);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-hover);
+  }
+}
+
+/* App Chrome (dark sidebar/header) */
+.app-chrome {
+  /* Dark theme tokens for sidebar */
+  --background: hsl(220 15% 8%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(222 14% 16%);
+  --card-foreground: hsl(0 0% 98%);
+  --border: hsl(220 13% 20%);
+  --primary: hsl(194 82% 51%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(222 14% 20%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(222 14% 20%);
+  --muted-foreground: hsl(215 13% 65%);
+  --accent: hsl(194 82% 51%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 98%);
+  
+  /* Apply dark background */
+  background: hsl(222 14% 12%);
+  border-color: hsl(220 10% 26%);
+}
+
+/* Plyr Video Player Styles */
+.plyr {
+  --plyr-color-main: var(--primary); /* Electric cyan accent */
+  --plyr-video-control-color: var(--foreground);
+  --plyr-video-control-color-hover: var(--foreground);
+  --plyr-video-control-background-hover: var(--primary);
+  --plyr-video-progress-buffered-background: rgba(21, 174, 233, 0.25);
+  --plyr-range-thumb-height: 14px;
+  --plyr-control-icon-size: 18px;
+  --plyr-font-size-base: 15px;
+  --plyr-font-size-small: 13px;
+  --plyr-font-size-large: 18px;
+}
+
+/* Dark mode adjustments */
+.dark .plyr {
+  --plyr-video-background: var(--background);
+  --plyr-menu-background: var(--card);
+  --plyr-menu-color: var(--foreground);
+}
+
+/* Ensure proper z-index for fullscreen */
+.plyr--fullscreen {
+  z-index: 10000;
+}
+
+/* Smooth transitions */
+.plyr__controls {
+  transition: opacity 0.3s ease;
+}
+
+/* Better mobile controls */
+@media (max-width: 768px) {
+  .plyr__controls {
+    padding: 10px;
+  }
+
+  .plyr__control {
+    padding: 8px;
+  }
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* Fix overflow issues on auth pages */
+body:has([data-auth-page]) {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+/* Ensure sonner toasts are properly positioned */
+[data-sonner-toaster] {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* Hide empty sonner notification containers */
+[data-sonner-toaster]:empty,
+section[aria-label*="Notifications"]:empty {
+  display: none !important;
+}
+
+/* Hide sonner when it has no visible toasts */
+[data-sonner-toaster]:not(:has([data-sonner-toast])) {
+  display: none !important;
+}

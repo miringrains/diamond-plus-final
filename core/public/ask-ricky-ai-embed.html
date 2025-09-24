@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask Ricky AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1b1e;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      background: #2483ff;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .header svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    #chatbox {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #0f1011;
+    }
+    
+    .message {
+      margin-bottom: 15px;
+      display: flex;
+      gap: 10px;
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    .message.user {
+      justify-content: flex-end;
+    }
+    
+    .message-content {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    
+    .user .message-content {
+      background: #2483ff;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .assistant .message-content {
+      background: #2a2b2e;
+      color: #fff;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .input-area {
+      background: #1a1b1e;
+      padding: 20px;
+      border-top: 1px solid #2a2b2e;
+      display: flex;
+      gap: 10px;
+    }
+    
+    #input {
+      flex: 1;
+      background: #2a2b2e;
+      border: 1px solid #3a3b3e;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    #input:focus {
+      border-color: #2483ff;
+    }
+    
+    #input::placeholder {
+      color: #888;
+    }
+    
+    #send {
+      background: #2483ff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    #send:hover {
+      background: #1d6fd8;
+    }
+    
+    #send:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+    
+    .loading {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+    
+    .loading span {
+      width: 8px;
+      height: 8px;
+      background: #2483ff;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    
+    .loading span:nth-child(1) { animation-delay: -0.32s; }
+    .loading span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+    
+    .error-message {
+      background: #ff4444;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 20px;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect>
+      <circle cx="12" cy="5" r="2"></circle>
+      <path d="M12 7v4"></path>
+    </svg>
+    <h1>Ask Ricky AI</h1>
+  </div>
+  
+  <div id="chatbox">
+    <div class="message assistant">
+      <div class="message-content">
+        Hi! I'm Ask Ricky AI. I'm here to help you with real estate, sales strategies, and success coaching. What would you like to know?
+      </div>
+    </div>
+  </div>
+  
+  <div class="input-area">
+    <input type="text" id="input" placeholder="Type your question..." autocomplete="off">
+    <button id="send">
+      Send
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    const chatbox = document.getElementById("chatbox");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+    let isLoading = false;
+
+    // Get the API base URL from the parent window or use relative path
+    const API_BASE_URL = window.location.origin;
+
+    async function sendMessage(message) {
+      if (isLoading) return;
+      
+      isLoading = true;
+      send.disabled = true;
+      
+      // Display user message
+      const userDiv = document.createElement("div");
+      userDiv.className = "message user";
+      userDiv.innerHTML = `<div class="message-content">${escapeHtml(message)}</div>`;
+      chatbox.appendChild(userDiv);
+      
+      // Show loading indicator
+      const loadingDiv = document.createElement("div");
+      loadingDiv.className = "message assistant";
+      loadingDiv.innerHTML = `
+        <div class="loading">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      `;
+      chatbox.appendChild(loadingDiv);
+      
+      chatbox.scrollTop = chatbox.scrollHeight;
+
+      try {
+        // Call our backend API instead of OpenAI directly
+        const response = await fetch(`${API_BASE_URL}/api/ask-ai`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to get response');
+        }
+        
+        const data = await response.json();
+        
+        // Remove loading indicator
+        chatbox.removeChild(loadingDiv);
+        
+        // Display assistant reply
+        const botDiv = document.createElement("div");
+        botDiv.className = "message assistant";
+        botDiv.innerHTML = `<div class="message-content">${escapeHtml(data.reply)}</div>`;
+        chatbox.appendChild(botDiv);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        
+        // Remove loading indicator
+        chatbox.removeChild(loadingDiv);
+        
+        // Show error message
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error-message";
+        errorDiv.textContent = "Sorry, I encountered an error. Please try again.";
+        chatbox.appendChild(errorDiv);
+      } finally {
+        isLoading = false;
+        send.disabled = false;
+        chatbox.scrollTop = chatbox.scrollHeight;
+      }
+    }
+    
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    send.addEventListener("click", () => {
+      const message = input.value.trim();
+      if (message && !isLoading) {
+        sendMessage(message);
+        input.value = "";
+      }
+    });
+    
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        const message = input.value.trim();
+        if (message && !isLoading) {
+          sendMessage(message);
+          input.value = "";
+        }
+      }
+    });
+    
+    // Focus input on load
+    input.focus();
+  </script>
+</body>
+</html>

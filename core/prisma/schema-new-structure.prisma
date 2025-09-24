@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  users             users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model courses {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  slug        String    @unique
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  modules     modules[] // Changed from lessons to modules
+}
+
+// New table for modules (was lessons at course level)
+model modules {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  courseId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  courses     courses       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  sub_lessons sub_lessons[] // Has many sub-lessons
+
+  @@index([courseId, order])
+}
+
+// Renamed from lessons to sub_lessons (the actual video content)
+model sub_lessons {
+  id                  String                @id @default(cuid())
+  title               String
+  description         String?
+  videoUrl            String
+  duration            Int?
+  order               Int
+  moduleId            String                // Changed from courseId to moduleId
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  thumbnailUrl        String?
+  muxPlaybackId       String?
+  muxAssetId          String?
+  muxPolicy           String?               @default("public") // "public" or "signed"
+  muxReadyAt          DateTime?
+  muxError            String?
+  modules             modules               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  playback_heartbeats playback_heartbeats[]
+  progress            progress[]
+
+  @@index([moduleId, order])
+}
+
+model playback_heartbeats {
+  id              String      @id @default(cuid())
+  userId          String
+  subLessonId     String      // Changed from lessonId
+  positionSeconds Int
+  deviceId        String?
+  timestamp       DateTime    @default(now())
+  sub_lessons     sub_lessons @relation(fields: [subLessonId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([timestamp])
+  @@index([userId, subLessonId])
+}
+
+model progress {
+  id              String      @id @default(cuid())
+  userId          String
+  subLessonId     String      // Changed from lessonId
+  completed       Boolean     @default(false)
+  watchTime       Int         @default(0)
+  lastWatched     DateTime    @default(now())
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  notes           String?
+  positionSeconds Int?        @default(0)
+  durationSeconds Int?        @default(0)
+  deviceId        String?
+  lastHeartbeat   DateTime?
+  playbackState   String?     @default("stopped")
+  playbackSpeed   Float?      @default(1.0)
+  sub_lessons     sub_lessons @relation(fields: [subLessonId], references: [id], onDelete: Cascade)
+  users           users       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subLessonId])
+  @@index([lastWatched])
+  @@index([userId])
+}
+
+model sessions {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  users        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model users {
+  id                  String                @id @default(cuid())
+  name                String?
+  email               String                @unique
+  password            String?
+  emailVerified       DateTime?
+  image               String?
+  role                Role                  @default(USER)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  accounts            accounts[]
+  playback_heartbeats playback_heartbeats[]
+  progress            progress[]
+  sessions            sessions[]
+}
+
+model verificationtokens {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  USER
+  ADMIN
+}

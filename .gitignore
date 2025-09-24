@@ -1,0 +1,16 @@
+node_modules
+.next
+.env
+.env.local
+.env.development
+.env.production
+*.log
+.DS_Store
+dist
+build
+tmp
+uploads
+.idea
+.vscode
+*.pem
+package-lock.json

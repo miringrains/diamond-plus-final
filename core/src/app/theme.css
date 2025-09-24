@@ -1,0 +1,249 @@
+/* Diamond Plus Theme - Global */
+/* Constrained Palette Only */
+
+/* Color Tokens */
+:root {
+  /* Base Palette */
+  --white: #FFFFFF;
+  --alice-blue: #E9F5FF;
+  --jordy-blue: #93BFEF;
+  --tufts-blue: #468BE6;
+  --cobalt-blue: #1A5799;
+  --cool-black: #092F64;
+  --eerie-black: #1F1F1F;
+  
+  /* Usage Tokens */
+  --page-bg: var(--white);
+  --podcasts-bg: #F9F9F9;
+  --nav-bg: var(--eerie-black);
+  --card-bg: var(--eerie-black);
+  --card-primary: var(--eerie-black);
+  --card-secondary: var(--white);
+  --brand: var(--tufts-blue);
+  --brand-strong: var(--cobalt-blue);
+  --ink: var(--eerie-black);
+  --ink-inverse: var(--white);
+  --border: var(--jordy-blue);
+  --icon-dark: var(--eerie-black);
+  --icon-light: var(--white);
+  --track-light: #E5E7EB;
+  --track-dark: #3B3B3B;
+  --bar-light: var(--tufts-blue);
+  --bar-dark: #93BFEF;
+  
+  /* Mapped Variables for shadcn/ui */
+  --background: var(--page-bg);
+  --foreground: var(--ink);
+  --muted: var(--alice-blue);
+  --muted-foreground: var(--ink);
+  --card: var(--card-primary);
+  --card-foreground: var(--ink-inverse);
+  --popover: var(--white);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: var(--ink-inverse);
+  --secondary: var(--alice-blue);
+  --secondary-foreground: var(--ink);
+  --accent: var(--jordy-blue);
+  --accent-foreground: var(--ink);
+  --destructive: var(--cobalt-blue);
+  --destructive-foreground: var(--ink-inverse);
+  --border: var(--border);
+  --input: var(--border);
+  --ring: var(--brand);
+  --radius: 0.5rem;
+}
+
+/* Base Styles */
+body {
+  background-color: var(--page-bg);
+  color: var(--ink);
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+@media (min-width: 768px) {
+  h2 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+}
+
+/* Component Overrides */
+.card {
+  background-color: var(--card-primary);
+  color: var(--ink-inverse);
+  border: 1px solid var(--card-primary);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.card-secondary {
+  background-color: var(--card-secondary);
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.btn-primary {
+  background-color: var(--brand);
+  color: var(--ink-inverse);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 150ms;
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-strong);
+}
+
+.card .btn-primary {
+  background-color: var(--brand);
+  color: var(--ink-inverse);
+}
+
+.card-secondary .btn-primary {
+  background-color: var(--brand);
+  color: var(--ink-inverse);
+}
+
+.btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brand);
+}
+
+.btn-secondary {
+  background-color: var(--white);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: background-color 150ms;
+}
+
+.btn-secondary:hover {
+  background-color: var(--alice-blue);
+}
+
+.card .btn-secondary {
+  background-color: var(--ink-inverse);
+  color: var(--brand);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--brand);
+}
+
+.btn-ghost:hover {
+  background-color: var(--alice-blue);
+}
+
+.card .btn-ghost {
+  color: var(--ink-inverse);
+}
+
+.card .btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.input-field {
+  background-color: var(--white);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 150ms;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand);
+}
+
+.progress-track {
+  background-color: var(--track-light);
+  border-radius: 4px;
+}
+
+.progress-bar {
+  background: var(--bar-light);
+  border-radius: 4px;
+}
+
+/* Progress on dark surfaces */
+.card .progress-track {
+  background-color: var(--track-dark);
+}
+
+.card .progress-bar {
+  background: var(--bar-dark);
+}
+
+/* Badge Styles */
+.badge {
+  background-color: var(--brand);
+  color: var(--ink-inverse);
+  border: 1px solid var(--brand);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  padding: 2px 10px;
+}
+
+.card-secondary .badge {
+  background-color: var(--alice-blue);
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+/* Section Backgrounds */
+.section-default {
+  background-color: var(--page-bg);
+}
+
+.section-podcasts {
+  background-color: var(--podcasts-bg);
+}
+
+/* Section Spacing */
+section {
+  padding: 2rem 0;
+}
+
+@media (min-width: 768px) {
+  section {
+    padding: 3rem 0;
+  }
+}
+
+/* Remove animations */
+* {
+  animation: none !important;
+}
+
+/* Focus states */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brand);
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

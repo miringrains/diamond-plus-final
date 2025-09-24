@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #e7ffe7; }
+        .error { background: #ffe7e7; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 5px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Login Debug Test</h1>
+    
+    <div class="test">
+        <h2>Test 1: Direct API Call</h2>
+        <input type="email" id="email" placeholder="Email" value="kevin@breakthruweb.com">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="testDirectAPI()">Test API</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="test">
+        <h2>Test 2: Check Form on Login Page</h2>
+        <button onclick="checkLoginPage()">Check Login Page</button>
+        <div id="form-result"></div>
+    </div>
+
+    <script>
+        async function testDirectAPI() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('api-result');
+            
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/supabase-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, redirectTo: '/dashboard' })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">Success! Response: ${JSON.stringify(data)}</div>`;
+                    if (data.success && data.redirectTo) {
+                        resultDiv.innerHTML += '<div>Redirecting in 2 seconds...</div>';
+                        setTimeout(() => {
+                            window.location.href = `https://diamondplusportal.com${data.redirectTo}`;
+                        }, 2000);
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Error ${response.status}: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Network Error: ${error.message}</div>`;
+            }
+        }
+
+        function checkLoginPage() {
+            const resultDiv = document.getElementById('form-result');
+            
+            // Open login page in new window
+            const win = window.open('/login', '_blank');
+            
+            resultDiv.innerHTML = `
+                <div>Login page opened in new window. In that window's console, run:</div>
+                <pre>
+// Check form
+console.log('Form exists:', !!document.querySelector('form'));
+
+// Check submit button
+const btn = document.querySelector('button[type="submit"]');
+console.log('Submit button:', btn);
+console.log('Button disabled:', btn?.disabled);
+console.log('Button text:', btn?.textContent);
+
+// Monitor form submission
+document.querySelector('form').addEventListener('submit', (e) => {
+    console.log('FORM SUBMITTED!');
+    console.log('Default prevented:', e.defaultPrevented);
+});
+
+// Check for React errors
+if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+    console.log('React DevTools detected');
+}
+                </pre>
+            `;
+        }
+    </script>
+
+    <div class="test">
+        <h2>Instructions</h2>
+        <ol>
+            <li>First, test the API directly with Test 1</li>
+            <li>Then check the login page with Test 2</li>
+            <li>Look for any errors in the browser console</li>
+        </ol>
+    </div>
+</body>
+</html>
