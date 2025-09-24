@@ -2,6 +2,8 @@
 
 web app for real estate agent training and content delivery
 
+_126 components, 361 modules_
+
 ### setup
 
 1. install dependencies:
